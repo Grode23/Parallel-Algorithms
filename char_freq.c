@@ -2,9 +2,12 @@
 #include <stdlib.h>
 #include <omp.h>
 #include <string.h>
+#include <limits.h>
 
 #define N 128
-#define base 0
+#define SIZE_OF_BUFFER 100000
+#define	NUM_OF_THREADS 8
+
 
 int main (int argc, char *argv[]) {
 
@@ -32,40 +35,89 @@ int main (int argc, char *argv[]) {
 	rewind (pFile);
 	printf("file size is %ld\n", file_size);
 
-	// Allocate memory to contain the file:
-	buffer = (char*) malloc (sizeof(char) * file_size);
-	if (buffer == NULL) {
-		printf ("Memory error\n"); 
-		return 3;
-	}
 
-	// copy the file into the buffer:
-	result = fread (buffer, 1, file_size, pFile);
-	if (result != file_size) {printf ("Reading error\n"); return 4;}
+	//Flag is true
+	int flag = 1;
 
+	//Initialize freq outside of the loop because I am going to use it in every repetition
 	memset(freq, 0, N * sizeof(int));
 
-	int temp[N];
-	memset(temp, 0, N *sizeof(int));
+	while(flag){
+		// For loop is going to execute 'limit' times
+		int limit = file_size;
+		
+		if(file_size > SIZE_OF_BUFFER){
+			
+			// Get the first size_of_buffer letters
+			buffer = (char*) malloc (sizeof(char) * SIZE_OF_BUFFER);
+			
+			// Reduce file_size for the next repetition
+			file_size -=SIZE_OF_BUFFER;
 
-	omp_set_num_threads(8);
-	#pragma omp parallel firstprivate(temp)
-	{
+			limit = SIZE_OF_BUFFER;
+		
+			// copy the file into the buffer:
+			result = fread (buffer, 1, SIZE_OF_BUFFER, pFile);
+			
+			if (result != SIZE_OF_BUFFER) {
+				printf ("Reading error\n"); 
+				return 4;		
+			}
+	
+		} else {
 
-		for (int i = omp_get_thread_num(); i < file_size; i+=8) {
-			temp[buffer[i] - base]++;
+			//While loop becomes false
+			flag = 0;
+
+			// Take the rest of the file
+			buffer = (char*) malloc (sizeof(char) * file_size);
+			
+			// copy the file into the buffer:
+			result = fread (buffer, 1, file_size, pFile);
+			
+			if (result != file_size) {
+				printf ("Reading error\n"); 
+				return 4;
+			}
+		}
+		// Error handling for malloc in buffer
+		if (buffer == NULL || buffer==0x0) {
+			printf ("Memory error\n"); 
+			return 3;
 		}
 
-		for(int i = 0; i < N; i++){
-			#pragma omp critical
-			freq[i] += temp[i];
-		}
+		// Numbers might be enormous, so I need long variable
+		long temp[N];
 
+		//Temporary variable instead of freq because I have a lot of threads
+		memset(temp, 0, N *sizeof(long));
+
+		omp_set_num_threads(NUM_OF_THREADS);
+
+		#pragma omp parallel firstprivate(temp)
+		{
+
+			// Count ASCII characters
+			for (int i = omp_get_thread_num(); i < limit; i+=NUM_OF_THREADS) {
+				temp[buffer[i]]++;
+			}
+
+			// Add values of private temp to shared freq
+			for(int i = 0; i < N; i++){
+				#pragma omp critical
+				freq[i] += temp[i];
+			}
+
+		}
 	}
+
+	long total = 0;
+
 	for (int j = 0; j < N; j++) {
-		printf("%c = %d\n", j + base, freq[j]);
+		printf("%c = %d\n", j, freq[j]);
+		total += freq[j];
 	}
-
+	printf("%ld\n",total );
 
 	fclose (pFile);
 	free (buffer);

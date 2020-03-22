@@ -16,4 +16,4 @@ mxv: mxv.c
 	$(CC) -o mxv mxv.c $(CFLAGS) 
 
 clean:
-	rm freq count
+	rm freq count cpi mxv

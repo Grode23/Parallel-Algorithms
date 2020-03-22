@@ -11,7 +11,10 @@ void count_sort(int array[], int size) {
 
 	int* temp = malloc(size * sizeof(int));
 
+	// Set number of threads
 	omp_set_num_threads(NUM_OF_THREADS);
+
+
 	#pragma omp parallel shared(temp) private(count)
 	{
 		int rank = omp_get_thread_num();
@@ -27,6 +30,7 @@ void count_sort(int array[], int size) {
 			temp[count] = array[i];
 		}
 	}
+
 	memcpy(array, temp, size * sizeof(int));
 	free(temp);
 }
@@ -41,10 +45,9 @@ void generate_array(int size, int* array, int limit) {
 }
 
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 
-	int size = 100000;
+	int size = 60000;
 	int array[size];
 
 	generate_array(size, array, 100);
@@ -59,9 +62,9 @@ int main(int argc, char *argv[])
 	//Finishing time of solution
 	double finish = omp_get_wtime();
 
-	// for(int i = 0; i < size; i++){
-	// 	printf("%d ",array[i] );
-	// }
+	for(int i = 0; i < size; i++){
+		printf("%d ",array[i] );
+	}
 
 	printf("Time spent: %f\n", finish - start);
 

@@ -8,7 +8,6 @@
 #define SIZE_OF_BUFFER 100000
 #define	NUM_OF_THREADS 8
 
-
 int main (int argc, char *argv[]) {
 
 	char * buffer;
@@ -37,6 +36,8 @@ int main (int argc, char *argv[]) {
 
 
 	//Flag is true
+	// When flag becomes false, stop executing the while loop
+	// And start the sum  
 	int flag = 1;
 
 	//Initialize freq outside of the loop because I am going to use it in every repetition

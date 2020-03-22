@@ -26,6 +26,7 @@ int main( int argc, char *argv[])
     pi = 0.0;
     h  = 1.0 / (double) n;
     sum = 0.0;
+
     #pragma omp parallel for reduction(+:sum) private(x)
     for (i = 1; i <= n; i++)
     {

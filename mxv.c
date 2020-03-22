@@ -1,13 +1,14 @@
-# include <stdlib.h>
-# include <stdio.h>
-# include <time.h>
-# include <omp.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+#include <omp.h>
 
 #define NUM_OF_THREADS 8
 
 void main ( int argc, char *argv[] ) {
-  double **a, *b, *c;
-  int N;
+	
+	double **a, *b, *c;
+	int N;
  
  
 	if (argc != 2) {

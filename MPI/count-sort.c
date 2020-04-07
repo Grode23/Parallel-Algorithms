@@ -3,6 +3,8 @@
 #include <string.h>
 #include "mpi.h"
 
+//bcast στο πρωτο for, αλλα να μειωσω και το μεγεθος της χ
+
 void count_sort(int array[], int size, int numtasks, int rank) {
 
 	int count;
@@ -56,10 +58,12 @@ int main(int argc, char *argv[]) {
 	MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-	int size = 60000;
+	int size = 60;
 	int array[size];
 
-	generate_array(size, array, 100);
+	//generate_array(size, array, 100);
+	for (int i=0; i<size; i++)
+		array[i] = size - i;
 
 	//Starting time of solution
 	double start = MPI_Wtime();

@@ -20,7 +20,7 @@ void count_sort(int array[], int size) {
 		int rank = omp_get_thread_num();
 		for (int i = rank; i < size; i += NUM_OF_THREADS) {
 			count = 0;
-			for (int j = 0; j < size; j++) {
+			for (int j = rank; j < size; j+= numtasks) {
 				if (array[j] < array[i])
 					count++;
 				else if (array[j] == array[i] && j < i)

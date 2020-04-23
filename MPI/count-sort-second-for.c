@@ -8,15 +8,12 @@ void count_sort(int array[], int size, int numtasks, int rank) {
 	int count;
 	int* temp = malloc(size * sizeof(int));
 	int final_count;
-	int difference = (size) % numtasks;
 
 	for (int i = 0; i < size; i++) {
 		count = 0;
 		final_count = 0;
 		for (int j = rank; j < size; j+= numtasks) {
-			if (array[j] < array[i])
-				count++;
-			else if (array[j] == array[i] && j < i)
+			if (array[j] < array[i] || (array[j] == array[i] && j < i))
 				count++;
 		}
 

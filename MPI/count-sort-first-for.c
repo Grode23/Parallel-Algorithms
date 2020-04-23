@@ -11,9 +11,7 @@ void count_sort(int array[], int size, int numtasks, int rank) {
 	for (int i = rank; i < size; i+= numtasks) {
 		count = 0;
 		for (int j = 0; j < size; j++) {
-			if (array[j] < array[i])
-				count++;
-			else if (array[i] == array[j] && j < i)
+			if (array[j] < array[i] || (array[j] == array[i] && j < i))
 				count++;
 		}
 

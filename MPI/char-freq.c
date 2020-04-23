@@ -27,6 +27,10 @@ int main (int argc, char *argv[]) {
 
 	// obtain file size:
 	fseek (pFile, 0, SEEK_END);
+	//change that to read different part of the file for each worker
+	//fseek(pFile, byte_i_want, SEEK_CURR μαλλον
+	//MPI_fileread)
+
 	file_size = ftell (pFile);
 	rewind (pFile);
 	if(rank == 0) {

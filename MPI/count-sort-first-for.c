@@ -18,7 +18,7 @@ void count_sort(int array[], int size, int numtasks, int rank) {
 		temp[count] = array[i];
 	}
 
-    MPI_Reduce(temp, array, size, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+	MPI_Reduce(temp, array, size, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
 	free(temp);
 

@@ -1,6 +1,5 @@
 #include <stdio.h> 
 #include <stdlib.h> 
-#include <cuda.h>
 
 #define N 128
 
@@ -28,7 +27,7 @@ __global__ void calc_freq(int *freq, int file_size, char *buffer, int total_thre
 int main (int argc, char *argv[]) {
 
 	int *freq_host, *sum_device;
-	char * buffer_device;
+	char *buffer_device;
 
 	// Error handling for arguments
 	if (argc != 4) {
@@ -64,6 +63,10 @@ int main (int argc, char *argv[]) {
 	for (int i = 0; i < N; i++){
 		freq_host[i]=0;
 	}
+	
+	cudaEvent_t start, stop;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
 
 	// Copy required values to device variables
 	cudaMemcpy(sum_device, freq_host, N * sizeof(int), cudaMemcpyHostToDevice);
@@ -74,16 +77,26 @@ int main (int argc, char *argv[]) {
 	int blocks = (strtol(argv[2], NULL, 10) + threads - 1) / threads;
 	int total_threads = blocks * threads;
 	
+	cudaEventRecord(start);
+
 	// Begin parallel code
 	calc_freq<<<blocks, threads>>>(sum_device, file_size, buffer_device, total_threads);
+	
+	cudaEventRecord(stop);
 
 	// Copy result from device to host
 	cudaMemcpy(freq_host, sum_device, N * sizeof(int), cudaMemcpyDeviceToHost);
+	
+	cudaEventSynchronize(stop);
+	float milliseconds = 0;
+	cudaEventElapsedTime(&milliseconds, start, stop);
 
 	// Display results
 	for (int j = 0; j < N; j++){
 		printf("%c = %d\n", j, freq_host[j]);
 	}	
+	
+	printf("GPU time (ms): %f\n", milliseconds);
 
 	// Free variables
 	fclose (pFile);

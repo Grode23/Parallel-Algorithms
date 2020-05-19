@@ -50,19 +50,33 @@ int main(int argc, char *argv[]) {
     y_host[i] = 0;
   }
 
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
+
   // Copy data to device
   cudaMemcpy(x_device, x_host, size * sizeof(int), cudaMemcpyHostToDevice);
   cudaMemcpy(y_device, y_host, size * sizeof(int), cudaMemcpyHostToDevice);
+  
+  cudaEventRecord(start);
 
   // Do the calculations
   count_sort<<<blocks, threads>>>(x_device, y_device, size);
+  
+  cudaEventRecord(stop);
 
   // Get data from device to host
   cudaMemcpy(y_host, y_device, size * sizeof(int), cudaMemcpyDeviceToHost);
+  
+  cudaEventSynchronize(stop);
+  float milliseconds = 0;
+  cudaEventElapsedTime(&milliseconds, start, stop);
 
   for (int i=0; i<size; i++){
     printf("%d\n", y_host[i]);
   }
+  
+  printf("GPU time (ms): %f\n", milliseconds);
 
   // Free variables
   free(x_host);

@@ -1,86 +1,94 @@
-# include <stdlib.h>
-# include <stdio.h>
-# include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
+// Device code
 __global__ void calc(float *result, float *b, float *a, int size){
 
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
-	
 
 	if(idx < size){
+		
 		float temp;
+		
 		for (int j = 0; j < size; j++){
 			temp = *(a + j + (idx * size)) * (*(b + j));
 			atomicAdd(&result[idx], temp);
 		}
-
 	}
 }
-
 
 int main ( int argc, char *argv[] ) {
 	float *a, *b, *c;
 	float *b_device, *c_device, *a_device;
-	int N;
+	int size;
 
 	if (argc != 3) {
 		printf ("Usage : %s <matrix size> <threads>\n", argv[0]);
 		exit(1);
 	}
 
-	N = strtol(argv[1], NULL, 10);
-
-	/*
-	Allocate the matrices.
-	*/
-	a = ( float *)  malloc ( N * N * sizeof ( float) );
-	b = ( float * ) malloc ( N * sizeof ( float ) );
-	c = ( float * ) malloc ( N * sizeof ( float ) );
+	// Get size from agruments
+	size = strtol(argv[1], NULL, 10);
 	
-	cudaMalloc((void **) &c_device, N * sizeof(float));
-	cudaMalloc((void **) &b_device, N * sizeof(float));
-	cudaMalloc((void **) &a_device, N * N * sizeof(float));
+	// Allocate the matrices
+	a = (float*) malloc (size * size * sizeof(float));
+	b = (float*) malloc (size * sizeof(float));
+	c = (float*) malloc (size * sizeof(float));
+	cudaMalloc((void **) &c_device, size * sizeof(float));
+	cudaMalloc((void **) &b_device, size * sizeof(float));
+	cudaMalloc((void **) &a_device, size * size * sizeof(float));
 
-	// for (int i = 0; i < N; i++) {
-	// 	a[i] = ( float * ) malloc ( N * sizeof ( float ) );
-	// }
-
-	/*
-	Assign values to the B and C matrices.
-	*/
+	// Assign values to the B and C matrices
 	srand ( time ( NULL));
 
-	for (int i = 0; i < N; i++ ) 
-		for (int j = 0; j < N; j++ )
-			*(a + j + (i * N)) = ( float ) rand() / (RAND_MAX * 2.0 - 1.0);
+	for (int i = 0; i < size; i++ ) 
+		for (int j = 0; j < size; j++ )
+			*(a + j + (i * size)) = ( float ) rand() / (RAND_MAX * 2.0 - 1.0);
 
-		for (int i = 0; i < N; i++ ) {
+		for (int i = 0; i < size; i++ ) {
 	    b[i] = ( float ) rand() / (RAND_MAX * 2.0 - 1.0);
 	    c[i] = 0.0;
 	}
 
-	cudaMemcpy(c_device, c, N * sizeof(float), cudaMemcpyHostToDevice);
-	cudaMemcpy(b_device, b, N * sizeof(float), cudaMemcpyHostToDevice);
-	cudaMemcpy(a_device, a, N * N * sizeof(float), cudaMemcpyHostToDevice);
+	cudaEvent_t start, stop;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
 
+	cudaMemcpy(c_device, c, size * sizeof(float), cudaMemcpyHostToDevice);
+	cudaMemcpy(b_device, b, size * sizeof(float), cudaMemcpyHostToDevice);
+	cudaMemcpy(a_device, a, size * size * sizeof(float), cudaMemcpyHostToDevice);
+
+	// User can choose only the number of threads per blocks 
+	// The blocks will be calculated automatically
 	int threads = strtol(argv[2], NULL, 10);
-	int blocks = (N + threads - 1) / threads;
+	int blocks = (size + threads - 1) / threads;
 
-	calc<<<blocks, threads>>>(c_device, b_device, a_device, N);
-	// /* computation */
-	// for (int i = 0; i < N; i++) {
-	// 	c[i] = 0.0;
-	// 	for (int j = 0; j < N; j++ )
-	// 		c[i] += a[i][j] * b[j];
-	// }
+	cudaEventRecord(start);
 
-	cudaMemcpy(c, c_device, N * sizeof(float), cudaMemcpyDeviceToHost);
+	calc<<<blocks, threads>>>(c_device, b_device, a_device, size);
+	
+	cudaEventRecord(stop);
 
+	cudaMemcpy(c, c_device, size * sizeof(float), cudaMemcpyDeviceToHost);
 
-	for (int i = 0; i < N; i++ ) {
+	cudaEventSynchronize(stop);
+	float milliseconds = 0;
+	cudaEventElapsedTime(&milliseconds, start, stop);
+
+	for (int i = 0; i < size; i++ ) {
 		printf("\t %1.3f ", b[i]);
 		printf("\t %1.3f \n", c[i]);
 	}
+	
+	printf("GPU time (ms): %f\n", milliseconds);
+
+	free(a);
+	free(b);
+	free(c);
+	cudaFree(a_device);
+	cudaFree(b_device);
+	cudaFree(c_device);
 
 	return 0;
 

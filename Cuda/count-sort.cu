@@ -61,14 +61,14 @@ int main(int argc, char *argv[]) {
   cudaMemcpy(y_host, y_device, size * sizeof(int), cudaMemcpyDeviceToHost);
 
   for (int i=0; i<size; i++){
-    ("%d\n", y_host[i]);
+    printf("%d\n", y_host[i]);
   }
 
   // Free variables
   free(x_host);
   free(y_host);
-  freeCuda(x_device);
-  freeCuda(y_device);
+  cudaFree(x_device);
+  cudaFree(y_device);
 
   return 0;
 }

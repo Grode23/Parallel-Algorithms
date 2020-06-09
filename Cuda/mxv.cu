@@ -18,7 +18,7 @@ __global__ void calc(float *result, float *b, float *a, int size){
 	}
 }
 
-int main ( int argc, char *argv[] ) {
+int main (int argc, char *argv[]) {
 	float *a, *b, *c;
 	float *b_device, *c_device, *a_device;
 	int size;

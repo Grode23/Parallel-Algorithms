@@ -6,22 +6,20 @@
 void count_sort(int array[], int size, int numtasks, int rank) {
 
 	int count;
-	int* temp = malloc(size * sizeof(int));
-	int final_count;
+	int* temp = calloc(size,  sizeof(int));
 
-	for (int i = 0; i < size; i++) {
+	for (int i = rank; i < size; i+= numtasks) {
 		count = 0;
-		final_count = 0;
-		for (int j = rank; j < size; j+= numtasks) {
+		for (int j = 0; j < size; j++) {
 			if (array[j] < array[i] || (array[j] == array[i] && j < i))
 				count++;
 		}
 
-		MPI_Reduce(&count, &final_count, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-		temp[final_count] = array[i];
+		temp[count] = array[i];
 	}
 
-	memcpy(array, temp, size * sizeof(int));
+	MPI_Reduce(temp, array, size, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
 	free(temp);
 
 }
@@ -51,12 +49,12 @@ int main(int argc, char *argv[]) {
 	MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-	int size = 90000;
+	int size = 20000;
 	int array[size];
 
-	//generate_array(size, array, 100);
-	for (int i=0; i<size; i++)
-		array[i] = size - i;
+	generate_array(size, array, 100);
+	// for (int i=0; i<size; i++)
+	// 	array[i] = size - i;
 
 	//Starting time of solution
 	double start = MPI_Wtime();
@@ -73,6 +71,7 @@ int main(int argc, char *argv[]) {
 		printf("Time spent: %f\n", finish - start);
 
 	}
+
 
 	MPI_Finalize();
 

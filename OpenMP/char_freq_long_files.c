@@ -34,6 +34,8 @@ int main (int argc, char *argv[]) {
 	rewind (pFile);
 	printf("file size is %ld\n", file_size);
 
+	//Starting time of solution
+	double start = omp_get_wtime();
 
 	//Flag is true
 	// When flag becomes false, stop executing the while loop
@@ -115,10 +117,15 @@ int main (int argc, char *argv[]) {
 	long total = 0;
 
 	for (int j = 0; j < N; j++) {
-		printf("%c = %d\n", j, freq[j]);
+		printf("%d = %d\n", j, freq[j]);
 		total += freq[j];
 	}
 	printf("%ld\n",total );
+
+	//Finishing time of solution
+	double finish = omp_get_wtime();
+
+	printf("Time spent: %f\n", finish - start);
 
 	fclose (pFile);
 	free (buffer);

@@ -2,12 +2,17 @@ CC=gcc
 CFLAGS = -fopenmp
 
 all: freq count cpi mxv
+	
+freq: freq_long freq_normal
 
-freq: char_freq.c 
-	$(CC) -o freq char_freq.c $(CFLAGS) 
+freq_long: char_freq_long_files.c 
+	$(CC) -o freq_long char_freq_long_files.c $(CFLAGS) 
 
-count: count-sort.c 
-	$(CC) -o count count-sort.c $(CFLAGS) 
+freq_normal: char_freq_normal.c 
+	$(CC) -o freq_normal char_freq_normal.c $(CFLAGS) 
+
+count: count_sort.c 
+	$(CC) -o count count_sort.c $(CFLAGS) 
 
 cpi: cpi.c
 	$(CC) -o cpi cpi.c $(CFLAGS) 
@@ -16,4 +21,4 @@ mxv: mxv.c
 	$(CC) -o mxv mxv.c $(CFLAGS) 
 
 clean:
-	rm freq count cpi mxv
+	rm freq_long freq_normal count cpi mxv

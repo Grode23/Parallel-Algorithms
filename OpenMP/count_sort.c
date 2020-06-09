@@ -4,7 +4,7 @@
 #include <omp.h>
 #include <time.h>
 
-#define NUM_OF_THREADS 8
+#define NUM_OF_THREADS 4
 
 void count_sort(int array[], int size) {
 	int count;
@@ -14,13 +14,12 @@ void count_sort(int array[], int size) {
 	// Set number of threads
 	omp_set_num_threads(NUM_OF_THREADS);
 
-
 	#pragma omp parallel shared(temp) private(count)
 	{
 		int rank = omp_get_thread_num();
 		for (int i = rank; i < size; i += NUM_OF_THREADS) {
 			count = 0;
-			for (int j = rank; j < size; j+= numtasks) {
+			for (int j = 0; j < size; j++) {
 				if (array[j] < array[i])
 					count++;
 				else if (array[j] == array[i] && j < i)
@@ -40,14 +39,16 @@ void generate_array(int size, int* array, int limit) {
 	//Initializion for rand();
 	srand(23);
 
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < size; i++){
 		*(array + i) = rand() % limit;
+		printf("%d\n",*(array + i) );
+	}
 }
 
 
 int main(int argc, char *argv[]) {
 
-	int size = 60000;
+	int size = 20000;
 	int array[size];
 
 	generate_array(size, array, 100);
@@ -66,6 +67,7 @@ int main(int argc, char *argv[]) {
 		printf("%d ",array[i] );
 	}
 
+	printf("\n");
 	printf("Time spent: %f\n", finish - start);
 
 	return 0;

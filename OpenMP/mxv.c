@@ -3,7 +3,7 @@
 #include <time.h>
 #include <omp.h>
 
-#define NUM_OF_THREADS 8
+#define NUM_OF_THREADS 4
 
 void main ( int argc, char *argv[] ) {
 	
@@ -30,15 +30,15 @@ void main ( int argc, char *argv[] ) {
 	c = ( double * ) malloc ( N * sizeof ( double ) );
 	
 	/*
-	Assign values to the B and C matrices.
+	Assign values to the A and B matrices.
 	*/
 	srand ( time ( NULL));
 
-	for (int i = 0; i < N; i++ ) 
+	for (int i = 0; i < N; i++ ) {
 		for (int j = 0; j < N; j++){
 	      	a[i][j] = rand() / (RAND_MAX * 2.0 - 1.0);
 		}
-
+	}
 
 	for (int i = 0; i < N; i++ ) {
 	    b[i] = rand() / (RAND_MAX * 2.0 - 1.0);
@@ -48,13 +48,16 @@ void main ( int argc, char *argv[] ) {
 
 	omp_set_num_threads(NUM_OF_THREADS);
 
+	//Starting time of solution
+	double start = omp_get_wtime();
+
 	/* computation */
 	#pragma omp parallel
 	{
 		double temp_c[N];
 
 		int rank = omp_get_thread_num();
-		printf("%d\n",rank );
+
 		for (int i = rank; i < N; i+=NUM_OF_THREADS) {
 			temp_c[i] = 0.0;
 			for (int j = 0; j < N; j++ ){
@@ -62,22 +65,25 @@ void main ( int argc, char *argv[] ) {
 			}
 
 		}
-		#pragma omp critical
-		{
-			for(int i = 0; i < N; i++){
-				if(temp_c[i] != 0){
-					c[i] = temp_c[i];
-				}
-			}
-		}    
+
+
+		for(int i = rank; i < N; i+= NUM_OF_THREADS){
+			c[i] = temp_c[i];
+		}
 	}	
+
+	//Finishing time of solution
+	double finish = omp_get_wtime();
+
 	/* output of data -- master */
   	for (int i = 0; i < N; i++ ) {
-		for (int j = 0; j < N; j++ )
-			printf ("%1.3f ", a[i][j]); 
+		//for (int j = 0; j < N; j++ )
+			//printf ("%1.3f ", a[i][j]); 
 		printf("\t %1.3f ", b[i]);
 		printf("\t %1.3f \n", c[i]);
 	}
+
+	printf("Time spent: %f\n", finish - start);
 
 }
 

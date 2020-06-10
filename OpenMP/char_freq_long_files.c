@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <omp.h>
 #include <string.h>
-#include <limits.h>
 
 #define N 128
+// Random big number
 #define SIZE_OF_BUFFER 100000
-#define	NUM_OF_THREADS 8
+#define	NUM_OF_THREADS 4
 
 int main (int argc, char *argv[]) {
 
@@ -37,7 +37,7 @@ int main (int argc, char *argv[]) {
 	//Starting time of solution
 	double start = omp_get_wtime();
 
-	//Flag is true
+	// Flag is true
 	// When flag becomes false, stop executing the while loop
 	// And start the sum  
 	int flag = 1;
@@ -61,12 +61,7 @@ int main (int argc, char *argv[]) {
 		
 			// copy the file into the buffer:
 			result = fread (buffer, 1, SIZE_OF_BUFFER, pFile);
-			
-			if (result != SIZE_OF_BUFFER) {
-				printf ("Reading error\n"); 
-				return 4;		
-			}
-	
+				
 		} else {
 
 			//While loop becomes false
@@ -78,10 +73,6 @@ int main (int argc, char *argv[]) {
 			// copy the file into the buffer:
 			result = fread (buffer, 1, file_size, pFile);
 			
-			if (result != file_size) {
-				printf ("Reading error\n"); 
-				return 4;
-			}
 		}
 		// Error handling for malloc in buffer
 		if (buffer == NULL || buffer==0x0) {
@@ -89,10 +80,13 @@ int main (int argc, char *argv[]) {
 			return 3;
 		}
 
-		// Numbers might be enormous, so I need long variable
-		long temp[N];
+		if (result != SIZE_OF_BUFFER && result != file_size) {
+			printf ("Reading error\n"); 
+			return 4;		
+		}
 
 		//Temporary variable instead of freq because I have a lot of threads
+		long temp[N];
 		memset(temp, 0, N *sizeof(long));
 
 		omp_set_num_threads(NUM_OF_THREADS);
@@ -120,7 +114,7 @@ int main (int argc, char *argv[]) {
 		printf("%d = %d\n", j, freq[j]);
 		total += freq[j];
 	}
-	printf("%ld\n",total );
+	printf("Total amount of characters: %ld\n",total );
 
 	//Finishing time of solution
 	double finish = omp_get_wtime();
@@ -129,6 +123,6 @@ int main (int argc, char *argv[]) {
 
 	fclose (pFile);
 	free (buffer);
-
+	
 	return 0;
 }

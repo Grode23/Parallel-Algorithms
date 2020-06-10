@@ -59,17 +59,21 @@ void main ( int argc, char *argv[] ) {
 		int rank = omp_get_thread_num();
 
 		for (int i = rank; i < N; i+=NUM_OF_THREADS) {
+			
 			temp_c[i] = 0.0;
+			
 			for (int j = 0; j < N; j++ ){
 				temp_c[i] += a[i][j] * b[j];
 			}
 
-		}
-
-
-		for(int i = rank; i < N; i+= NUM_OF_THREADS){
 			c[i] = temp_c[i];
+
 		}
+
+
+		// for(int i = rank; i < N; i+= NUM_OF_THREADS){
+		// 	c[i] = temp_c[i];
+		// }
 	}	
 
 	//Finishing time of solution
@@ -77,8 +81,8 @@ void main ( int argc, char *argv[] ) {
 
 	/* output of data -- master */
   	for (int i = 0; i < N; i++ ) {
-		//for (int j = 0; j < N; j++ )
-			//printf ("%1.3f ", a[i][j]); 
+		// for (int j = 0; j < N; j++ )
+		// 	printf ("%1.3f ", a[i][j]); 
 		printf("\t %1.3f ", b[i]);
 		printf("\t %1.3f \n", c[i]);
 	}

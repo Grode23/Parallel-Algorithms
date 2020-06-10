@@ -20,12 +20,15 @@ void count_sort(int array[], int size) {
 		for (int i = rank; i < size; i += NUM_OF_THREADS) {
 			count = 0;
 			for (int j = 0; j < size; j++) {
+				// Increase count if array[j] is less than array[i]
 				if (array[j] < array[i])
 					count++;
+				// Increase count if array[j] is equal to array[i] and its index is less
 				else if (array[j] == array[i] && j < i)
 					count++;
 			}
-			#pragma omp critical
+			// I think that critical is not required
+			//#pragma omp critical
 			temp[count] = array[i];
 		}
 	}
@@ -37,7 +40,7 @@ void count_sort(int array[], int size) {
 void generate_array(int size, int* array, int limit) {
 
 	//Initializion for rand();
-	srand(23);
+	srand(time(NULL));
 
 	for (int i = 0; i < size; i++){
 		*(array + i) = rand() % limit;

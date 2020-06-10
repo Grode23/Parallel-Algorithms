@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "mpi.h"
 
 #define N 128
@@ -16,7 +17,6 @@ int main (int argc, char *argv[]) {
 	MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-
 	if (argc != 2) {
 		printf ("Usage : %s <file_name>\n", argv[0]);
 		return 1;
@@ -25,17 +25,16 @@ int main (int argc, char *argv[]) {
 	FILE* pFile = fopen ( filename, "rb" );
 	if (pFile==NULL) {printf ("File error\n"); return 2;}
 
-	// obtain file size:
-	fseek (pFile, 0, SEEK_END);
-	//change that to read different part of the file for each worker
-	//fseek(pFile, byte_i_want, SEEK_CURR μαλλον
-	//MPI_fileread)
-
-	file_size = ftell (pFile);
-	rewind (pFile);
+	// obtain file size
+	fseek(pFile, 0, SEEK_END);
+	file_size = ftell(pFile);
+	rewind(pFile);
 	if(rank == 0) {
 		printf("file size is %ld\n", file_size);
 	}
+
+	//Starting time of solution
+	double start = MPI_Wtime();
 
 	// allocate memory to contain the file:
 	char* buffer = (char*) malloc (sizeof(char)*file_size);
@@ -58,13 +57,23 @@ int main (int argc, char *argv[]) {
 	MPI_Reduce (&freq,&final,N, MPI_INT,MPI_SUM,0,MPI_COMM_WORLD);
 
 	if(rank == 0) {
-		for (int j=0; j<N; j++) {
-			printf("%d = %d\n", j, final[j]);
+		long total = 0;
+
+		for (int j = 0; j < N; j++) {
+			printf("%d = %d\n", j, freq[j]);
+			total += freq[j];
 		}
+		printf("Total amount of characters: %ld\n",total );
+		
+		//Finishing time of solution
+		double finish = MPI_Wtime();
+
+		printf("Time spent: %f\n", finish - start);
+
 	}
 
 	fclose (pFile);
-	free (buffer);
+	free(buffer);
 
 	MPI_Finalize();
 

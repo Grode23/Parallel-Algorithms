@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+
 #include "mpi.h"
 
 void count_sort(int array[], int size, int numtasks, int rank) {
@@ -27,7 +29,7 @@ void count_sort(int array[], int size, int numtasks, int rank) {
 void generate_array(int size, int* array, int limit) {
 
 	//Initializion for rand();
-	srand(23);
+	srand(time(NULL));
 
 	for (int i = 0; i < size; i++)
 		*(array + i) = rand() % limit;
@@ -63,6 +65,7 @@ int main(int argc, char *argv[]) {
 
 	//Finishing time of solution
 	double finish = MPI_Wtime();
+
 	if(rank == 0) {
 
 		printf("Array after sorting: \n");

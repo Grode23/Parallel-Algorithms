@@ -91,10 +91,14 @@ int main (int argc, char *argv[]) {
 	float milliseconds = 0;
 	cudaEventElapsedTime(&milliseconds, start, stop);
 
-	// Display results
-	for (int j = 0; j < N; j++){
-		printf("%c = %d\n", j, freq_host[j]);
-	}	
+
+	long total = 0;
+
+	for (int j = 0; j < N; j++) {
+		printf("%d = %d\n", j, freq_host[j]);
+		total += freq_host[j];
+	}
+	printf("Total amount of characters: %ld\n",total );
 	
 	printf("GPU time (ms): %f\n", milliseconds);
 

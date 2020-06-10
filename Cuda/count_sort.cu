@@ -26,7 +26,7 @@ __global__ void count_sort(int *x, int *y, int size){
 void generate_array(int size, int* x_host, int* y_host, int limit) {
 
   //Initializion for rand();
-  srand(23);
+  srand(time(NULL));
 
   for (int i = 0; i < size; i++){
     *(x_host + i) = rand() % limit;
@@ -57,10 +57,6 @@ int main(int argc, char *argv[]) {
   cudaMalloc((void **) &y_device, size * sizeof(int));
 
   generate_array(size, x_host, y_host, 100);
-  // for (int i=0; i<size; i++){
-  //   x_host[i] = size - i;
-  //   y_host[i] = 0;
-  // }
 
   cudaEvent_t start, stop;
   cudaEventCreate(&start);
@@ -85,10 +81,12 @@ int main(int argc, char *argv[]) {
   cudaEventElapsedTime(&milliseconds, start, stop);
 
   for (int i=0; i<size; i++){
-    printf("%d\n", y_host[i]);
+    printf("%d ", y_host[i]);
   }
+
+  printf("\n");
   
-  printf("GPU time (s): %f\n", milliseconds/1000);
+  printf("GPU time (ms): %f\n", milliseconds);
 
   // Free variables
   free(x_host);

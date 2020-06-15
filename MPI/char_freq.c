@@ -60,7 +60,7 @@ int main (int argc, char *argv[]) {
 		long total = 0;
 
 		for (int j = 0; j < N; j++) {
-			printf("%d = %d\n", j, freq[j]);
+			printf("%d = %d\n", j, final[j]);
 			total += freq[j];
 		}
 		printf("Total amount of characters: %ld\n",total );
